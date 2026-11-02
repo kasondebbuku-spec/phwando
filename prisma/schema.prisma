@@ -1,0 +1,168 @@
+// Phwando data model.
+// An Organization (a hotel, venue or organiser) owns Events. Guests place Orders for TicketTiers;
+// a paid Order issues one Ticket per seat, which is scanned at the door.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  STAFF // can check guests in and view the guest list, cannot edit events
+}
+
+enum OrderStatus {
+  PENDING // created, waiting for the guest to approve the mobile-money prompt
+  PAID
+  FAILED
+}
+
+enum TicketStatus {
+  VALID
+  CHECKED_IN
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  users     User[]
+  events    Event[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  name           String
+  passwordHash   String
+  role           Role         @default(OWNER)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+}
+
+model Event {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  slug           String       @unique
+  code           String // short prefix printed on ticket codes, e.g. BM40
+  template       String // birthday | wedding | gala | conference | church | party
+  theme          String // key into THEMES in src/lib/themes.ts
+  titleLead      String       @default("") // e.g. "Happy 40th Birthday,"
+  title          String
+  subtitle       String       @default("")
+  about          String       @default("")
+  verseText      String?
+  verseRef       String?
+  host           String
+  venue          String
+  dressCode      String       @default("")
+  startsAt       DateTime
+  timeText       String // human wording, e.g. "6 pm till late"
+  published      Boolean      @default(true)
+  honoree        String? // whose day it is, e.g. "Pastor Benjamin Mwape"; enables the messages book wording
+  moderateWall   Boolean      @default(true) // public messages need approval before they show
+  createdAt      DateTime     @default(now())
+  tiers          TicketTier[]
+  orders         Order[]
+  messages       Message[]
+}
+
+model TicketTier {
+  id          String  @id @default(cuid())
+  eventId     String
+  event       Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  description String  @default("")
+  priceNgwee  Int // price in ngwee (K1 = 100 ngwee); 0 = free
+  seatsPer    Int     @default(1) // a table ticket admits several people
+  capacity    Int // how many of this tier can be sold
+  sortOrder   Int     @default(0)
+  orders      Order[]
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  reference      String      @unique // our reference, also sent to Lenco
+  eventId        String
+  event          Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tierId         String
+  tier           TicketTier  @relation(fields: [tierId], references: [id])
+  quantity       Int
+  amountNgwee    Int
+  guestName      String
+  guestPhone     String // normalised to 260XXXXXXXXX
+  guestEmail     String?
+  status         OrderStatus @default(PENDING)
+  method         String // airtel | mtn | zamtel | free
+  payPhone       String?
+  lencoReference String?
+  failureReason  String?
+  paidAt         DateTime?
+  createdAt      DateTime    @default(now())
+  tickets        Ticket[]
+
+  @@index([eventId, status])
+  @@index([guestPhone])
+}
+
+model Ticket {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  orderId     String
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  admits      Int          @default(1)
+  status      TicketStatus @default(VALID)
+  checkedInAt DateTime?
+  checkedInBy String?
+}
+
+enum MessageStatus {
+  PENDING // waiting for an organiser to approve
+  APPROVED
+  REJECTED
+}
+
+enum MessageVisibility {
+  PRIVATE // only the honoree and organisers; goes in the book
+  PUBLIC // also shown on the public wall once approved
+}
+
+// Birthday messages, wishes, prayers, guest-book entries. Anyone can send one, ticket or not.
+// Approved messages are collected into the printable book at /dashboard/events/<id>/book.
+model Message {
+  id         String            @id @default(cuid())
+  eventId    String
+  event      Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name       String
+  relation   String? // "How you know him", e.g. "Church member since 2015"
+  text       String
+  memory     String? // optional favourite memory or testimony
+  photoPath  String? // stored file name under UPLOAD_DIR
+  email      String? // never shown publicly
+  visibility MessageVisibility @default(PUBLIC)
+  status     MessageStatus     @default(PENDING)
+  createdAt  DateTime          @default(now())
+
+  @@index([eventId, status, createdAt])
+}
+
+// One-time codes for "find my ticket"
+model LoginCode {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([phone, createdAt])
+}
