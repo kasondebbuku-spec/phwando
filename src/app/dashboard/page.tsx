@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { fullTitle, kwacha, longDate } from "@/lib/format";
@@ -50,9 +51,9 @@ export default async function Dashboard() {
           <p className="muted">{upcoming.length} upcoming event{upcoming.length === 1 ? "" : "s"}</p>
         </div>
         {user.role === "OWNER" && (
-          <a className="btn primary" href="/dashboard/events/new">
+          <Link className="btn primary" href="/dashboard/events/new">
             + New event
-          </a>
+          </Link>
         )}
       </div>
       {upcoming.length ? list(upcoming) : <div className="card muted">No upcoming events. Create one to get a guest page and start selling tickets.</div>}

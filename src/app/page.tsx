@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { THEMES } from "@/lib/themes";
 
 export default function Home() {
@@ -5,9 +6,9 @@ export default function Home() {
   return (
     <main className="page">
       <div className="wrap" style={{ display: "grid", gap: 40, paddingTop: "6vh" }}>
-        <a href="/" className="brand">
+        <Link href="/" className="brand">
           <span className="brand-mark">P</span>Phwando
-        </a>
+        </Link>
         <section style={{ display: "grid", gap: 18, maxWidth: 680 }}>
           <h1 style={{ fontFamily: "var(--display)", fontWeight: 400, fontSize: "clamp(2.4rem, 6vw, 4rem)", lineHeight: 1.05, margin: 0, textWrap: "balance" }}>
             Invitations, tickets and the door, <em style={{ color: "var(--accent)" }}>in one place</em>.

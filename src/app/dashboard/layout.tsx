@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { signOut } from "./actions";
 
@@ -11,7 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </a>
         <nav aria-label="Organiser">
           <a href="/dashboard">Events</a>
-          {user.role === "OWNER" && <a href="/dashboard/events/new">New event</a>}
+          {user.role === "OWNER" && <Link href="/dashboard/events/new">New event</Link>}
         </nav>
         <div className="who">
           <span>

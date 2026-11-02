@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
@@ -138,7 +139,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
             © {event.startsAt.getFullYear()} {event.host} · {event.venue}
           </span>
           <span>
-            Tickets by <a href="/">Phwando</a>
+            Tickets by <Link href="/">Phwando</Link>
           </span>
         </footer>
       </div>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
@@ -23,9 +24,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <main className="page">
       <div className="narrow" style={{ maxWidth: 400, paddingTop: "8vh" }}>
-        <a href="/" className="brand">
+        <Link href="/" className="brand">
           <span className="brand-mark">P</span>Phwando
-        </a>
+        </Link>
         <h1>Organiser sign in</h1>
         <form action={signIn} className="card">
           <div className="field">

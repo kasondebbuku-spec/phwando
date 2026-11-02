@@ -43,9 +43,7 @@ function SalesChart({ orders }: { orders: { amountNgwee: number; paidAt: Date | 
         return (
           <g key={x.key}>
             <rect x={L + i * bw + bw * 0.18} y={y(x.v)} width={bw * 0.64} height={(H - T - B) * (x.v / max)} rx={3} fill="var(--accent)" opacity={last ? 1 : 0.55}>
-              <title>
-                {shortDate(x.d)}: K{x.v.toLocaleString("en-GB")}
-              </title>
+              <title>{`${shortDate(x.d)}: K${x.v.toLocaleString("en-GB")}`}</title>
             </rect>
             {(i % 2 === 1 || last) && (
               <text x={L + i * bw + bw / 2} y={H - 6} textAnchor="middle">

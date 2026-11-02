@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 type Found = { reference: string; event: string; startsAt: string; timeText: string; venue: string; tier: string; quantity: number; status: string };
@@ -48,9 +49,9 @@ export default function FindTicketPage() {
     <main className="page">
       <div className="narrow">
         <div>
-          <a href="/" className="brand" style={{ marginBottom: 20 }}>
+          <Link href="/" className="brand" style={{ marginBottom: 20 }}>
             <span className="brand-mark">P</span>Phwando
-          </a>
+          </Link>
           <h1>Find my ticket</h1>
           <p className="muted" style={{ margin: "4px 0 0" }}>
             Lost the SMS? Get your QR ticket back with a one-time code sent to your phone.
